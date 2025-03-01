@@ -12,14 +12,8 @@
 #include <GLFW/glfw3.h>
 
 
+
 void initialise_OpenGL(void) {
-  static bool initialised_OpenGL = false;
-
-  if (initialised_OpenGL) {
-    warning("Already initialised OpenGL");
-    return;
-  }
-
   glfwInit();
 
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -33,13 +27,12 @@ void initialise_OpenGL(void) {
                  GLFW_TRUE);
 #endif
 
-  initialised_OpenGL = true;
   info("Initialised OpenGL");
 }
 
 void resize_window_viewport(GLFWwindow *_window, int width, int height) {
   glViewport(0, 0, width, height);
-  info("Resized OpenGL window viewport");
+  info("Resized OpenGL viewport");
 }
 
 GLFWwindow *initialise_window(int width, int height, const char *title) {
