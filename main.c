@@ -63,6 +63,32 @@ GLFWwindow *initialise_window(int width, int height, const char *title) {
   return window;
 }
 
+int compile_shader(GLenum shader_type,
+                   const char *shader_source,
+                   GLuint *shader) {
+  static char shader_compilation_log_buffer[1024];
+  int success;
+
+  *shader = glCreateShader(shader_type);
+
+  glShaderSource(*shader, 1, &shader_source, NULL);
+  glCompileShader(*shader);
+
+  glGetShaderiv(*shader, GL_COMPILE_STATUS, &success);
+
+  if (!success) {
+    glGetShaderInfoLog(*shader, 1024, NULL,
+                       shader_compilation_log_buffer);
+    printf(ANSI_RED "%s\n" ANSI_RESET, shader_compilation_log_buffer);
+  }
+
+  else {
+    info("Compiled shader successfully");
+  }
+
+  return success;
+}
+
 int main(void) {
   GLFWwindow *window;
   unsigned int vbo, vao, vertex_shader, fragment_shader, shader_program;
@@ -71,11 +97,15 @@ int main(void) {
   window = initialise_window(600, 400,
                              "My first GLFW+OpenGL window");
 
+  if (!window)
+    return EXIT_FAILURE;
+
   /* Have some data to send to the GPU */
-  const float vertices[] = {
-    -1.0,  0.0, 0,
-     0.0, -1.0, 0,
-     0.0,  0.0, 0,
+  static const float vertices[] = {
+     1.0,  1.0,
+     1.0, -1.0,
+    -1.0,  1.0,
+    -1.0, -1.0,
   };
 
   /* We create a vertex array object that really all it does is point
@@ -93,23 +123,12 @@ int main(void) {
 
   /* We specify the layout of the data we sent to the GPU (which is at
      offset 0). We have to enable it, as it is disabled by default. */
-  glVertexAttribPointer(0, 3, GL_FLOAT,
-                        GL_FALSE, 3 * sizeof(float), NULL);
+  glVertexAttribPointer(0, 2 /* # of components per vertex */, GL_FLOAT,
+                        GL_FALSE, 2 * sizeof(float), NULL);
   glEnableVertexAttribArray(0);
 
-  /* Create vertex shader */
-  vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-
-  /* Set and compile vertex shader source code */
-  glShaderSource(vertex_shader, 1, &vertex_shader_program, NULL);
-  glCompileShader(vertex_shader);
-
-  /* Create fragment shader */
-  fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
-
-  /* Set and compile fragment shader (same as before) */
-  glShaderSource(fragment_shader, 1, &fragment_shader_program, NULL);
-  glCompileShader(fragment_shader);
+  compile_shader(GL_VERTEX_SHADER, vertex_shader_program, &vertex_shader);
+  compile_shader(GL_FRAGMENT_SHADER, fragment_shader_program, &fragment_shader);
 
   /* Our two shaders get linked into a program */
   shader_program = glCreateProgram();
@@ -134,7 +153,7 @@ int main(void) {
     glClear(GL_COLOR_BUFFER_BIT);
 
     /* Display result of shader program */
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
     glfwSwapBuffers(window);
     glfwPollEvents();
