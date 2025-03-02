@@ -87,9 +87,6 @@ int main(void) {
   glBindVertexArray(vao);
   glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-  /* Create and bind a vertex buffer to OpenGL's context */
-  glBindBuffer(GL_ARRAY_BUFFER, vbo);
-
   /* Copy `vertices' into the GPU  */
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices),
                vertices, GL_STATIC_DRAW);
